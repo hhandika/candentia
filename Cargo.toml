@@ -2,8 +2,14 @@
 name = "candentia"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Heru Handika <herubiolog@gmail.com>"]
+license = "MIT"
+description = "A cli tool for managing CT-Scan data to study evolutionary biology"
+readme = "README.md"
+homepage = "https://github.com/hhandika/candentia"
+repository = "https://github.com/hhandika/candentia"
+keywords = ["cli", "utility", "ct-scan", "evolutionary-biology"]
+categories = ["command-line-utilities", "science"]
 
 [dependencies]
 walkdir = "2.*"
