@@ -16,6 +16,7 @@ impl<'a> Organizer<'a> {
     }
 
     pub fn organize(&self) {
+        log::info!("{:18}: {}", "File counts", self.scans.len());
         self.scans.iter().for_each(|scan| {
             let scan_name = scan
                 .file_name()
@@ -34,6 +35,7 @@ impl<'a> Organizer<'a> {
             fs::create_dir_all(&voucher_path).expect("Could not create voucher directory");
             fs::rename(scan, voucher_path.join(&scan_name)).expect("Could not move scan");
         });
+        log::info!("Done");
     }
 
     fn capture_voucher_name(&self, name: &str) -> Option<String> {
