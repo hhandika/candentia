@@ -7,5 +7,8 @@ edition = "2021"
 
 [dependencies]
 walkdir = "2.*"
-clap = "3.*"
+clap = { version = "3.*", features = ["cargo"] }
 regex = "1.*"
+log = "0.*"
+log4rs = "1.*"
+ansi_term = "0.*"
