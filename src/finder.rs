@@ -1,4 +1,8 @@
-use std::path::{Path, PathBuf};
+use std::{
+    fs::OpenOptions,
+    io::{BufWriter, Result, Write},
+    path::{Path, PathBuf},
+};
 
 use walkdir::WalkDir;
 
@@ -31,9 +35,36 @@ impl<'a> Finder<'a> {
     }
 
     pub fn list_scans(&self) {
-        self.find_scans()
-            .iter()
-            .for_each(|path| println!("{}", path.display()));
+        let scans = self.find_scans();
+        log::info!("Found {} scans", scans.len());
+        self.write_metadata(&scans)
+            .expect("Failed writing metadata");
+    }
+
+    fn write_metadata(&self, scans: &[PathBuf]) -> Result<()> {
+        let output = self.input.join("scans.csv");
+        let file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(output)?;
+        let mut writer = BufWriter::new(file);
+        write!(writer, "path,size,created,accessed")?;
+        scans.iter().for_each(|path| {
+            let metadata = path.metadata().expect("Failed reading metadata");
+            let size = metadata.len();
+            let created = metadata.created().expect("Failed reading creation time");
+            let accessed = metadata.accessed().expect("Failed reading access time");
+            writeln!(
+                writer,
+                "{},{},{:?},{:?}",
+                path.display(),
+                size,
+                created,
+                accessed
+            )
+            .expect("Failed writing metadata");
+        });
+        Ok(())
     }
 }
 
