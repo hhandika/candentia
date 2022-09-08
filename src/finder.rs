@@ -45,15 +45,23 @@ impl<'a> Finder<'a> {
         let output = self.input.join("scans.csv");
         let file = OpenOptions::new()
             .write(true)
-            .create_new(true)
+            .create_new(false)
             .open(output)?;
         let mut writer = BufWriter::new(file);
-        write!(writer, "path,size,created,accessed")?;
+        writeln!(writer, "path,size,created,accessed")?;
         scans.iter().for_each(|path| {
             let metadata = path.metadata().expect("Failed reading metadata");
             let size = metadata.len();
-            let created = metadata.created().expect("Failed reading creation time");
-            let accessed = metadata.accessed().expect("Failed reading access time");
+            let created = match metadata.created() {
+                Ok(created) => format!("{created:?}",),
+                Err(_) => "Unknown".to_string(),
+            };
+
+            let accessed = match metadata.accessed() {
+                Ok(accessed) => format!("{accessed:?}",),
+                Err(_) => "Unknown".to_string(),
+            };
+
             writeln!(
                 writer,
                 "{},{},{:?},{:?}",
