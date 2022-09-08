@@ -7,9 +7,9 @@ const DIVIDER_LEN: usize = 80;
 #[cfg(not(tarpaulin_include))]
 pub fn print_welcome_text(version: &str) {
     log::info!("{}", Yellow.paint(get_rep_str('=')));
-    let text = format!("SEGUL v{}", version);
+    let text = format!("candentia v{}", version);
     log::info!("{}", Yellow.paint(text));
-    log::info!("{}", Yellow.paint("An alignment tool for phylogenomics"));
+    log::info!("{}", Yellow.paint("A cli tool for managing CT-Scan data"));
     log::info!("{}", Yellow.paint(get_rep_str('-')));
 }
 
