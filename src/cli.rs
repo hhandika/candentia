@@ -63,35 +63,6 @@ fn build_cli(version: &str) -> ArgMatches {
         .get_matches()
 }
 
-fn setup_logger() -> Result<()> {
-    let log_dir = std::env::current_dir()?;
-    let target = log_dir.join(LOG_FILE);
-    let tofile = FileAppender::builder()
-        .encoder(Box::new(PatternEncoder::new(
-            "{d(%Y-%m-%d %H:%M:%S %Z)} - {l} - {m}\n",
-        )))
-        .build(target)?;
-
-    let stdout = ConsoleAppender::builder()
-        .encoder(Box::new(PatternEncoder::new("{m}\n")))
-        .build();
-
-    let config = Config::builder()
-        .appender(Appender::builder().build("stdout", Box::new(stdout)))
-        .appender(Appender::builder().build("logfile", Box::new(tofile)))
-        .build(
-            Root::builder()
-                .appender("stdout")
-                .appender("logfile")
-                .build(LevelFilter::Info),
-        )
-        .expect("Failed building log configuration");
-
-    log4rs::init_config(config).expect("Cannot initiate log configuration");
-
-    Ok(())
-}
-
 struct OrganizerCli<'a> {
     matches: &'a ArgMatches,
 }
@@ -141,4 +112,33 @@ impl<'a> IO<'a> {
             .map(PathBuf::from)
             .collect()
     }
+}
+
+fn setup_logger() -> Result<()> {
+    let log_dir = std::env::current_dir()?;
+    let target = log_dir.join(LOG_FILE);
+    let tofile = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new(
+            "{d(%Y-%m-%d %H:%M:%S %Z)} - {l} - {m}\n",
+        )))
+        .build(target)?;
+
+    let stdout = ConsoleAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{m}\n")))
+        .build();
+
+    let config = Config::builder()
+        .appender(Appender::builder().build("stdout", Box::new(stdout)))
+        .appender(Appender::builder().build("logfile", Box::new(tofile)))
+        .build(
+            Root::builder()
+                .appender("stdout")
+                .appender("logfile")
+                .build(LevelFilter::Info),
+        )
+        .expect("Failed building log configuration");
+
+    log4rs::init_config(config).expect("Cannot initiate log configuration");
+
+    Ok(())
 }
