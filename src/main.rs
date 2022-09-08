@@ -1,13 +1,8 @@
-use std::path::Path;
-
+mod cli;
 mod finder;
 mod organizer;
+mod utils;
 
 fn main() {
-    let path = Path::new(".");
-    let file_paths = finder::find_scans(path);
-    file_paths
-        .iter()
-        .for_each(|path| println!("{}", path.display()));
-    organizer::Organizer::new(&file_paths, path).organize();
+    cli::parse_cli();
 }
