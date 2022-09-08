@@ -92,32 +92,8 @@ fn setup_logger() -> Result<()> {
     Ok(())
 }
 
-trait InputCli {
-    fn parse_dir(&self) -> &Path;
-    fn parse_input(&self) -> Vec<PathBuf>;
-    fn parse_output(&self) -> &Path;
-}
-
 struct OrganizerCli<'a> {
     matches: &'a ArgMatches,
-}
-
-impl InputCli for OrganizerCli<'_> {
-    fn parse_dir(&self) -> &Path {
-        Path::new(self.matches.value_of("dir").expect("No directory provided"))
-    }
-
-    fn parse_output(&self) -> &Path {
-        Path::new(self.matches.value_of("output").expect("No output provided"))
-    }
-
-    fn parse_input(&self) -> Vec<PathBuf> {
-        self.matches
-            .values_of("input")
-            .expect("No input provided")
-            .map(PathBuf::from)
-            .collect()
-    }
 }
 
 impl OrganizerCli<'_> {
@@ -126,12 +102,43 @@ impl OrganizerCli<'_> {
     }
 
     fn organize_scans(&self) {
-        let scan_paths = if self.matches.is_present("dir") {
+        let io = IO::new(self.matches);
+        let scan_paths = io.find_scans();
+        let scans = Organizer::new(&scan_paths, io.parse_output_dir());
+        scans.organize();
+    }
+}
+
+struct IO<'a> {
+    matches: &'a ArgMatches,
+}
+
+impl<'a> IO<'a> {
+    fn new(matches: &'a ArgMatches) -> Self {
+        Self { matches }
+    }
+
+    fn find_scans(&self) -> Vec<PathBuf> {
+        if self.matches.is_present("dir") {
             finder::find_scans(self.parse_dir())
         } else {
             self.parse_input()
-        };
-        let scans = Organizer::new(&scan_paths, self.parse_output());
-        scans.organize();
+        }
+    }
+
+    fn parse_output_dir(&self) -> &Path {
+        Path::new(self.matches.value_of("output").expect("No output provided"))
+    }
+
+    fn parse_dir(&self) -> &Path {
+        Path::new(self.matches.value_of("dir").expect("No directory provided"))
+    }
+
+    fn parse_input(&self) -> Vec<PathBuf> {
+        self.matches
+            .values_of("input")
+            .expect("No input provided")
+            .map(PathBuf::from)
+            .collect()
     }
 }
