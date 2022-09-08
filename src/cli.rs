@@ -9,7 +9,7 @@ use log4rs::config::{Appender, Config, Root};
 use log4rs::encode::pattern::PatternEncoder;
 
 use crate::organizer::Organizer;
-use crate::{finder, utils};
+use crate::{finder::Finder, utils};
 
 const LOG_FILE: &str = "candentia.log";
 
@@ -20,6 +20,7 @@ pub fn parse_cli() {
     utils::print_welcome_text(version);
     match args.subcommand() {
         Some(("organize", org_matches)) => OrganizerCli::new(org_matches).organize_scans(),
+        Some(("find", find_matches)) => FinderCli::new(find_matches).list_scans(),
         _ => unreachable!("Invalid subcommand"),
     }
 }
@@ -60,6 +61,16 @@ fn build_cli(version: &str) -> ArgMatches {
                         .takes_value(true),
                 ),
         )
+        .subcommand(
+            Command::new("find").about("Find scans in a directory").arg(
+                Arg::new("dir")
+                    .short('d')
+                    .long("dir")
+                    .help("File parent directory")
+                    .takes_value(true)
+                    .required(true),
+            ),
+        )
         .get_matches()
 }
 
@@ -80,6 +91,21 @@ impl OrganizerCli<'_> {
     }
 }
 
+struct FinderCli<'a> {
+    matches: &'a ArgMatches,
+}
+
+impl FinderCli<'_> {
+    fn new(matches: &ArgMatches) -> FinderCli {
+        FinderCli { matches }
+    }
+
+    fn list_scans(&self) {
+        let io = IO::new(self.matches);
+        Finder::new(&io.parse_dir()).list_scans();
+    }
+}
+
 struct IO<'a> {
     matches: &'a ArgMatches,
 }
@@ -91,7 +117,7 @@ impl<'a> IO<'a> {
 
     fn find_scans(&self) -> Vec<PathBuf> {
         if self.matches.is_present("dir") {
-            finder::find_scans(self.parse_dir())
+            Finder::new(self.parse_dir()).find_scans()
         } else {
             self.parse_input()
         }
