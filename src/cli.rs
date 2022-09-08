@@ -1,5 +1,5 @@
 use std::io::Result;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use clap::{crate_description, crate_name, Arg, ArgMatches, Command};
 use log::LevelFilter;
@@ -39,6 +39,16 @@ fn build_cli(version: &str) -> ArgMatches {
                         .long("dir")
                         .help("File parent directory")
                         .takes_value(true)
+                        .required(true),
+                )
+                .arg(
+                    Arg::new("input")
+                        .short('i')
+                        .long("input")
+                        .help("Input directory")
+                        .takes_value(true)
+                        .conflicts_with("dir")
+                        .multiple_values(true)
                         .required(true),
                 )
                 .arg(
@@ -84,6 +94,7 @@ fn setup_logger() -> Result<()> {
 
 trait InputCli {
     fn parse_dir(&self) -> &Path;
+    fn parse_input(&self) -> Vec<PathBuf>;
     fn parse_output(&self) -> &Path;
 }
 
@@ -99,6 +110,14 @@ impl InputCli for OrganizerCli<'_> {
     fn parse_output(&self) -> &Path {
         Path::new(self.matches.value_of("output").expect("No output provided"))
     }
+
+    fn parse_input(&self) -> Vec<PathBuf> {
+        self.matches
+            .values_of("input")
+            .expect("No input provided")
+            .map(PathBuf::from)
+            .collect()
+    }
 }
 
 impl OrganizerCli<'_> {
@@ -107,7 +126,11 @@ impl OrganizerCli<'_> {
     }
 
     fn organize_scans(&self) {
-        let scan_paths = finder::find_scans(self.parse_dir());
+        let scan_paths = if self.matches.is_present("dir") {
+            finder::find_scans(self.parse_dir())
+        } else {
+            self.parse_input()
+        };
         let scans = Organizer::new(&scan_paths, self.parse_output());
         scans.organize();
     }
