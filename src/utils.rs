@@ -2,7 +2,7 @@ use std::iter;
 
 use ansi_term::Colour::Yellow;
 
-const DIVIDER_LEN: usize = 80;
+const DIVIDER_LEN: usize = 60;
 
 #[cfg(not(tarpaulin_include))]
 pub fn print_welcome_text(version: &str) {

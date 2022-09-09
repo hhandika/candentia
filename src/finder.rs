@@ -45,7 +45,7 @@ impl<'a> Finder<'a> {
         let output = self.input.join("scans.csv");
         let file = OpenOptions::new()
             .write(true)
-            .create_new(false)
+            .create_new(true)
             .open(output)?;
         let mut writer = BufWriter::new(file);
         writeln!(writer, "path,size,created,accessed")?;
