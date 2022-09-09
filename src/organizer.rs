@@ -31,9 +31,14 @@ impl<'a> Organizer<'a> {
                 }
             };
 
-            let voucher_path = self.output.join(voucher_name);
-            fs::create_dir_all(&voucher_path).expect("Could not create voucher directory");
-            fs::rename(scan, voucher_path.join(&scan_name)).expect("Could not move scan");
+            let output_path = self.output.join(voucher_name);
+            if output_path.is_dir() {
+                log::info!("{} already exists. Skipping!", output_path.display());
+                return;
+            } else {
+                fs::create_dir_all(&output_path).expect("Could not create voucher directory");
+                fs::rename(scan, output_path.join(&scan_name)).expect("Could not move scan");
+            }
         });
         log::info!("Done");
     }
