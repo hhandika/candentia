@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use regex::Regex;
 
-const VOUCHER_NAME: &str = r"^\D+(_\d{3,10})";
+const VOUCHER_NAME: &str = r"^\D+(_{0,1}\d{3,10})";
 
 pub struct Organizer<'a> {
     pub scans: &'a [PathBuf],
