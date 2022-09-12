@@ -57,7 +57,14 @@ mod tests {
     fn test_capture_voucher_name() {
         let organizer = Organizer::new(&[], &Path::new(""));
         let name = "Uromys_spce_MUSEUM_12345_2080_1066_960_2027_0.0119013mm_16be_un.raw";
+        let name_wo_underscore =
+            "Uromys_spce_MUSEUM12345_2080_1066_960_2027_0.0119013mm_16be_un.raw";
         let voucher_name = organizer.capture_voucher_name(name);
+        let voucher_name_wo_underscore = organizer.capture_voucher_name(name_wo_underscore);
         assert_eq!(voucher_name, Some("Uromys_spce_MUSEUM_12345".to_string()));
+        assert_eq!(
+            voucher_name_wo_underscore,
+            Some("Uromys_spce_MUSEUM12345".to_string())
+        );
     }
 }
