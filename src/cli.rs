@@ -1,7 +1,9 @@
+use std::ffi::OsStr;
 use std::io::Result;
 use std::path::{Path, PathBuf};
 
 use clap::{crate_description, crate_name, Arg, ArgMatches, Command};
+use glob::glob;
 use log::LevelFilter;
 use log4rs::append::console::ConsoleAppender;
 use log4rs::append::file::FileAppender;
@@ -132,11 +134,31 @@ impl<'a> IO<'a> {
     }
 
     fn parse_input(&self) -> Vec<PathBuf> {
-        self.matches
+        let inputs: Vec<PathBuf> = self
+            .matches
             .values_of("input")
             .expect("No input provided")
             .map(PathBuf::from)
-            .collect()
+            .collect();
+        if cfg!(windows) {
+            let inputs = inputs
+                .iter()
+                .map(|t| OsStr::new(t).to_string_lossy())
+                .collect::<Vec<_>>();
+            let files: Vec<PathBuf> = inputs
+                .iter()
+                .flat_map(|i| {
+                    glob(i)
+                        .expect("Failed globbing files")
+                        .filter_map(|ok| ok.ok())
+                        .collect::<Vec<PathBuf>>()
+                })
+                .collect();
+            assert!(!files.is_empty(), "Empty folders!");
+            files
+        } else {
+            inputs
+        }
     }
 }
 
